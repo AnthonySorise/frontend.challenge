@@ -29,7 +29,8 @@ const compareByDateTime = (a: AgendaItem, b: AgendaItem) =>
 const Agenda = (): ReactElement => {
   const account = useContext(AccountContext);
   const [hour, setHour] = useState(DateTime.local().hour);
-
+  const [filterIndex, setFilterIndex] = useState(0);
+  const [calendarsToLoad, setCalendarsToLoad] = useState(account.calendars);
 
   //Level 1: Agenda's title bug fix
   //Bug was caused by 'title' having no dependencies as the second argument of its useMemo(), this resulted in title's value only being initialized, but never updating
@@ -43,15 +44,28 @@ const Agenda = (): ReactElement => {
     }, 60000)
   }, []);
 
+  //Level 3: Filter agenda events by calendar
+  //To implement this feature I created a filterIndex state and a calendarsToLoad state
+  useEffect(() => {
+      if(filterIndex != 0){
+        setCalendarsToLoad([account.calendars[filterIndex - 1]]);//subtract 1 - '0' spot is occupied by "All"
+      }
+      else{setCalendarsToLoad(account.calendars)};
+  }, [filterIndex]);
+
+  const handleFilterSelection = () => {
+    let selectElement = document.getElementById('SelectFilter') as HTMLSelectElement;
+    setFilterIndex(selectElement.selectedIndex);
+  }
 
   const events: AgendaItem[] = useMemo(
     () =>
-      account.calendars
+    calendarsToLoad
         .flatMap((calendar) =>
           calendar.events.map((event) => ({ calendar, event })),
         )
         .sort(compareByDateTime),
-    [account],
+    [account, calendarsToLoad],
   )
   const title = useMemo(() => greeting(hour), [hour]);
   const disconnectedErrorMessage = account.isDisconnected ? <div className={style.errorMessage}>Experiencing connection issues: list may not be up to date</div> : "";
@@ -62,7 +76,18 @@ const Agenda = (): ReactElement => {
         <div className={style.header}>
           <span className={style.title}>{title}</span>
         </div>
+
+        <div className={style.filterSelectContainer}>
+          <select className={style.filterSelect} id={"SelectFilter"} onChange={handleFilterSelection}>
+            <option key={0}>All</option>
+            {account.calendars.map((calendar, i) =>
+              <option key={i + 1} className={style.filterSelectOption} style={{color: calendar.color}}>{calendar.id}</option>
+            )}
+          </select>
+        </div>
+
         {disconnectedErrorMessage}
+        
         <List>
           {events.map(({ calendar, event }) => (
             <EventCell key={event.id} calendar={calendar} event={event} />
