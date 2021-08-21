@@ -32,3 +32,10 @@
   @include title-text;
   color: $blackColor;
 }
+
+.errorMessage{
+    color:red;
+    font-weight:bold;
+    width:100%;
+    text-align: center;
+}

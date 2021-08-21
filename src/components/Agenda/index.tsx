@@ -27,7 +27,22 @@ const compareByDateTime = (a: AgendaItem, b: AgendaItem) =>
  */
 
 const Agenda = (): ReactElement => {
-  const account = useContext(AccountContext)
+  const account = useContext(AccountContext);
+  const [hour, setHour] = useState(DateTime.local().hour);
+
+
+  //Level 1: Agenda's title bug fix
+  //Bug was caused by 'title' having no dependencies as the second argument of its useMemo(), this resulted in title's value only being initialized, but never updating
+  //to fix the bug I created an 'hour' state that tracks the current hour, and used that as a dependency so 'title' updates every time the hour changes
+  useEffect(() => {
+    setInterval(() =>{
+        let currentHour = DateTime.local().hour;
+        if(hour != currentHour){
+            setHour(currentHour)
+        }
+    }, 60000)
+  }, []);
+
 
   const events: AgendaItem[] = useMemo(
     () =>
@@ -38,22 +53,8 @@ const Agenda = (): ReactElement => {
         .sort(compareByDateTime),
     [account],
   )
-
-  //Level 1: Agenda's title bug fix
-  //Bug was caused by 'title' having no dependencies as the second argument of its useMemo(), this resulted in title's value only being initialized, but never updating
-  //to fix the bug I created an 'hour' state that tracks the current hour, and used that as a dependency so 'title' updates every time the hour changes
-  const [hour, setHour] = useState(DateTime.local().hour);
-  
-  useEffect(() => {
-    setInterval(() =>{
-        let currentHour = DateTime.local().hour;
-        if(hour != currentHour){
-            setHour(currentHour)
-        }
-    }, 60000)
-  }, []);
-
-  const title = useMemo(() => greeting(hour), [hour])
+  const title = useMemo(() => greeting(hour), [hour]);
+  const disconnectedErrorMessage = account.isDisconnected ? <div className={style.errorMessage}>Experiencing connection issues: list may not be up to date</div> : "";
 
   return (
     <div className={style.outer}>
@@ -61,7 +62,7 @@ const Agenda = (): ReactElement => {
         <div className={style.header}>
           <span className={style.title}>{title}</span>
         </div>
-
+        {disconnectedErrorMessage}
         <List>
           {events.map(({ calendar, event }) => (
             <EventCell key={event.id} calendar={calendar} event={event} />

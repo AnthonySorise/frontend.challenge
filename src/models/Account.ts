@@ -1,7 +1,8 @@
 import Calendar from './Calendar'
 
 type Account = {
-  calendars: Calendar[]
+  calendars: Calendar[],
+  isDisconnected?: boolean
 }
 
 export default Account
