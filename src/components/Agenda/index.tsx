@@ -1,4 +1,4 @@
-import React, { ReactElement, useContext, useMemo } from 'react'
+import React, { ReactElement, useContext, useMemo, useState, useEffect } from 'react'
 import { DateTime } from 'luxon'
 
 import greeting from 'lib/greeting'
@@ -39,7 +39,21 @@ const Agenda = (): ReactElement => {
     [account],
   )
 
-  const title = useMemo(() => greeting(DateTime.local().hour), [])
+  //Level 1: Agenda's title bug fix
+  //Bug was caused by 'title' having no dependencies as the second argument of its useMemo(), this resulted in title's value only being initialized, but never updating
+  //to fix the bug I created an 'hour' state that tracks the current hour, and used that as a dependency so 'title' updates every time the hour changes
+  const [hour, setHour] = useState(DateTime.local().hour);
+  
+  useEffect(() => {
+    setInterval(() =>{
+        let currentHour = DateTime.local().hour;
+        if(hour != currentHour){
+            setHour(currentHour)
+        }
+    }, 60000)
+  }, []);
+
+  const title = useMemo(() => greeting(hour), [hour])
 
   return (
     <div className={style.outer}>
