@@ -69,6 +69,10 @@ The requirements for this feature are:
 Please add your answers to the questions below:
 
 1. How long did you spend on this challenge?
+- 4.75 hrs
 2. In your opinion, what are features that Double could work on that would be helpful for assistants when managing agendas?
+- It's hard to say at this juncture, as I haven't had much experience with the application itself, and I don't have much personal experience with personal assistants.  With that said, I think integration with other services is a good idea, for the convenience of handling many tasks all from one application.  
 3. If you had more time, what would you add or change in the codebase?
+- I would complete the implementation of Level 4, as described in comments.  I would consider breaking some of the newer features/elements into separate components.
 4. Do you have any constructive feedback that you would like to share with our team?
+- This was a fun test and it was hard to pull myself away from it
