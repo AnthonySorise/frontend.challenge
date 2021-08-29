@@ -2,6 +2,7 @@ import React, { ReactElement, useContext, useMemo, useState, useEffect } from 'r
 import { DateTime } from 'luxon'
 
 import greeting from 'lib/greeting'
+import runEvery from 'lib/runEvery'
 
 import Calendar from 'src/models/Calendar'
 import Event from 'src/models/Event'
@@ -36,14 +37,30 @@ const Agenda = (): ReactElement => {
   //Level 1: Agenda's title bug fix
   //Bug was caused by 'title' having no dependencies as the second argument of its useMemo(), this resulted in title's value only being initialized, but never updating
   //to fix the bug I created an 'hour' state that tracks the current hour, and used that as a dependency so 'title' updates every time the hour changes
-  useEffect(() => {
-    setInterval(() =>{
-        let currentHour = DateTime.local().hour;
-        if(hour != currentHour){
-            setHour(currentHour)
+
+  //***old implementation - fixed by adding return to clear interval***
+//   useEffect(() => {
+//     let hourUpdateInterval = setInterval(() =>{
+//         let currentHour = DateTime.local().hour;
+//         if(hour != currentHour){
+//             setHour(currentHour)
+//         }
+//     }, 60000)
+//     return () =>{window.clearInterval(hourUpdateInterval)}
+//   }, []);
+  //***new implementation - utilizes runEvery function***
+  useEffect(
+    ()=>{
+        const checkHour = () => {
+            let currentHour = DateTime.local().hour;
+            if(hour != currentHour){
+              setHour(currentHour)
+            }
         }
-    }, 60000)
-  }, []);
+        runEvery(60000, checkHour)
+    }
+  , [])
+
 
   //Level 3: Filter agenda events by calendar
   //To implement this feature I created a filterIndex state and a calendarsToLoad state
