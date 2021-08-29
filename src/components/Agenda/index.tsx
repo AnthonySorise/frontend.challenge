@@ -1,4 +1,4 @@
-import React, { ReactElement, useContext, useMemo, useState, useEffect } from 'react'
+import React, { ReactElement, useContext, useMemo, useState, useEffect, useRef } from 'react'
 import { DateTime } from 'luxon'
 
 import greeting from 'lib/greeting'
@@ -33,6 +33,7 @@ const Agenda = (): ReactElement => {
   const [filterIndex, setFilterIndex] = useState(0);
   const [calendarsToLoad, setCalendarsToLoad] = useState(account.calendars);
   const [isSortedByDepartment, setIsSortedByDepartment] = useState(false)
+  const selectRef = useRef<HTMLSelectElement | null>(null);
 
   //Level 1: Agenda's title bug fix
   //Bug was caused by 'title' having no dependencies as the second argument of its useMemo(), this resulted in title's value only being initialized, but never updating
@@ -72,8 +73,7 @@ const Agenda = (): ReactElement => {
   }, [filterIndex]);
 
   const handleFilterSelection = () => {
-    let selectElement = document.getElementById('SelectFilter') as HTMLSelectElement;
-    setFilterIndex(selectElement.selectedIndex);
+    setFilterIndex(selectRef.current.selectedIndex);
   }
 
   //Level 4: I ran out of time on this one.  The button is implemented and connected to a state - isSortedByDepartment.  I've set the return of Agenda to render different code/html depending on this state (line 101).
@@ -99,7 +99,7 @@ const Agenda = (): ReactElement => {
         </div>
 
         <div className={style.filterSelectContainer}>
-          <select className={style.filterSelect} id={"SelectFilter"} onChange={handleFilterSelection}>
+          <select className={style.filterSelect} ref={selectRef} onChange={handleFilterSelection}>
             <option key={0}>All</option>
             {account.calendars.map((calendar, i) =>
               <option key={i + 1} className={style.filterSelectOption} style={{color: calendar.color}}>{calendar.id}</option>
